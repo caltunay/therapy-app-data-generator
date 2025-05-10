@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for
 import random
 import requests
 import os
-import csv
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,7 +38,6 @@ def get_pixabay_image(word):
         return data['hits'][0]['largeImageURL']
     else:
         return None
-
 
 def translate_deepl(text):
     url = "https://api-free.deepl.com/v2/translate"
