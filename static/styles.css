@@ -10,6 +10,7 @@ html, body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding-bottom: 40px;
 }
 
 .container {
@@ -27,7 +28,7 @@ html, body {
 
 .main-image {
     display: block;
-    max-width: 300px;
+    max-width: 500px;
     width: 100%;
     height: auto;
     border-radius: 10px;
@@ -72,4 +73,14 @@ button, .reject-button {
 
 button:hover, .reject-button:hover {
     opacity: 0.9;
+}
+
+h1 {
+    font-size: 2.2em;
+    font-weight: bold
+}
+
+h3 {
+    font-size: 1.5em;
+    font-weight: normal;
 }
