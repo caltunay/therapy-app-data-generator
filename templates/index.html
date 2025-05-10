@@ -3,26 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Translation App</title>
+    <title>Kelime ve Görsel Eşleştirme</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>{{ translation }}</h1>
-        {% if image_url %}
-            <img src="{{ image_url }}" alt="{{ word }}" style="max-width: 300px;">
-        {% endif %}
-        <!-- <p>Translation: {{ translation }}</p> -->
-        <div class="button-row">
-            <form action="{{ url_for('upload') }}" method="post">
-                <input type="hidden" name="image_url" value="{{ image_url }}">
-                <input type="hidden" name="translation" value="{{ translation }}">
-                <input type="hidden" name="word" value="{{ word }}">
-                <button type="submit">Kabul Et</button>
-            </form>
-            <form action="{{ url_for('reject') }}" method="post">
-                <button type="submit" class="reject-button">Reddet</button>
-            </form>
+    <div class="center-container">
+        <div class="container">
+            <h1 style="margin-bottom: 24px; text-align: center;">
+                Afazi Terapi için Veri Tabanı Oluşturun
+            </h1>
+            {% if image_url %}
+            <div class="instructions">
+                <strong>Not:</strong> Eğer görsel, kelimeyle eşleşiyorsa ve görselin bu kelimeyi temsil ettiği açıkça anlaşılıyorsa, kabul edin. Eğer görsel çok fazla farklı cevaba açık veya kelimeyi yalnızca görsele bakarak anlamak zor ise, reddedin.
+            </div>
+            <hr style="width: 60%; margin: 20px auto;">
+            <h3>{{ translation }}</h3>
+            <div class="image-wrapper">
+                <img src="{{ image_url }}" alt="{{ word }}" class="main-image">
+            </div>
+            {% endif %}
+            <div class="button-row">
+                <form action="{{ url_for('upload') }}" method="post">
+                    <input type="hidden" name="image_url" value="{{ image_url }}">
+                    <input type="hidden" name="translation" value="{{ translation }}">
+                    <input type="hidden" name="word" value="{{ word }}">
+                    <button type="submit">Kabul Et</button>
+                </form>
+                <form action="{{ url_for('reject') }}" method="post">
+                    <button type="submit" class="reject-button">Reddet</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
