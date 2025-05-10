@@ -6,9 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_API_KEY')
 DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
-IMGUR_CLIENT_ID = os.getenv('IMGUR_CLIENT_ID')
 PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
 
 SUPABASE_PB_KEY = os.getenv('SUPABASE_ANON_PUBLIC_KEY')
@@ -20,14 +18,6 @@ app = Flask(__name__)
 # Load words once
 with open('word_list.txt', 'r', encoding='utf-8') as f:
     WORD_LIST = [w.strip() for w in f if w.strip()]
-
-# def get_unsplash_image(word):
-#     url = f"https://api.unsplash.com/search/photos?query={word}&client_id={UNSPLASH_ACCESS_KEY}"
-#     r = requests.get(url)
-#     data = r.json()
-#     if data.get('results'):
-#         return data['results'][0]['urls']['small']
-#     return None
 
 # unsplash images are much better but api has a limit
 def get_pixabay_image(word):
@@ -50,14 +40,6 @@ def translate_deepl(text):
     r = requests.post(url, data=params)
     result = r.json()
     return result['translations'][0]['text']
-
-def upload_to_imgur(image_url):
-    headers = {'Authorization': f'Client-ID {IMGUR_CLIENT_ID}'}
-    data = {'image': image_url, 'type': 'url'}
-    r = requests.post('https://api.imgur.com/3/image', headers=headers, data=data)
-    if r.status_code == 200:
-        return r.json()['data']['link']
-    return None
 
 def save_to_supabase(imgur_url, word, translation):
     headers = {
@@ -90,13 +72,8 @@ def upload():
     image_url = request.form['image_url']
     word = request.form['word']
     translation = request.form['translation']
-    imgur_url = upload_to_imgur(image_url)
 
-    final_url = imgur_url if imgur_url else image_url
-    if not imgur_url:
-        print(f"Imgur upload failed for {image_url}, saving original URL.")
-
-    save_to_supabase(final_url, word, translation)
+    save_to_supabase(image_url, word, translation)
     return redirect(url_for('home'))
 
 @app.route('/reject', methods=['POST'])
