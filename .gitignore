@@ -1,0 +1,10 @@
+.env
+*.log
+dist/
+build/
+.DS_Store
+*.local
+coverage/
+*.sqlite
+*.db
+app-data/
