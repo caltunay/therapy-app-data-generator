@@ -8,6 +8,7 @@ load_dotenv()
 
 DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
 PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_API_KEY')
 
 SUPABASE_PB_KEY = os.getenv('SUPABASE_ANON_PUBLIC_KEY')
 SUPABASE_URL = os.getenv('SUPABASE_PROJECT_URL')
@@ -18,6 +19,16 @@ app = Flask(__name__)
 # Load words once
 with open('word_list.txt', 'r', encoding='utf-8') as f:
     WORD_LIST = [w.strip() for w in f if w.strip()]
+
+def get_unsplash_image(word):
+    url = f"https://api.unsplash.com/search/photos?query={word}&client_id={UNSPLASH_ACCESS_KEY}"
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    data = r.json()
+    if data.get('results'):
+        return data['results'][0]['urls']['small']
+    return None
 
 # unsplash images are much better but api has a limit
 def get_pixabay_image(word):
@@ -63,7 +74,11 @@ def save_to_supabase(imgur_url, word, translation):
 @app.route('/')
 def home():
     word = random.choice(WORD_LIST).title()
-    image_url = get_pixabay_image(word)
+    # try unsplash first
+    image_url = get_unsplash_image(word)
+    if not image_url:
+        # if unsplash fails, try pixabay    
+        image_url = get_pixabay_image(word)
     translation = translate_deepl(word).title()
     return render_template('index.html', word=word, image_url=image_url, translation=translation)
 
