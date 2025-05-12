@@ -6,19 +6,36 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
-PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_API_KEY')
+PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
+PEXELS_API_KEY = os.getenv('PEXELS_API_KEY') 
+
+DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
 
 SUPABASE_PB_KEY = os.getenv('SUPABASE_ANON_PUBLIC_KEY')
 SUPABASE_URL = os.getenv('SUPABASE_PROJECT_URL')
 SUPABASE_TABLE = "speech-therapy-data" 
+
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 app = Flask(__name__)
 
 # Load words once
 with open('word_list.txt', 'r', encoding='utf-8') as f:
     WORD_LIST = [w.strip() for w in f if w.strip()]
+
+def get_pexels_image(word):
+    headers = {'Authorization': PEXELS_API_KEY}
+    params = {'query': word, 'per_page':1}
+
+    response = requests.get('https://api.pexels.com/v1/search', headers=headers, params=params)
+    data = response.json()
+    
+    if len(data['photos']) > 0:
+        return data['photos'][0]['src']['original']
+    else:
+        return None
 
 def get_unsplash_image(word):
     url = f"https://api.unsplash.com/search/photos?query={word}&client_id={UNSPLASH_ACCESS_KEY}"
@@ -74,11 +91,19 @@ def save_to_supabase(imgur_url, word, translation):
 @app.route('/')
 def home():
     word = random.choice(WORD_LIST).title()
+    
+    image_providers = [get_pexels_image, get_unsplash_image, get_pixabay_image]
+    
+    for provider_func in image_providers:
+        image_url = provider_func(word)
+        if image_url: 
+            break
+    # image_url = get_pexels_image(word)
     # try unsplash first
-    image_url = get_unsplash_image(word)
-    if not image_url:
-        # if unsplash fails, try pixabay    
-        image_url = get_pixabay_image(word)
+    # image_url = get_unsplash_image(word)
+    # if not image_url:
+    #     # if unsplash fails, try pixabay    
+    #     image_url = get_pixabay_image(word)
     translation = translate_deepl(word).title()
     return render_template('index.html', word=word, image_url=image_url, translation=translation)
 
