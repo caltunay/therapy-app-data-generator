@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
-import random
 import requests
+import boto3
 import os
 from dotenv import load_dotenv
+import random
+import uuid
 
 load_dotenv()
 
@@ -14,7 +16,7 @@ DEEPL_API_KEY = os.getenv('DEEPL_API_KEY')
 
 SUPABASE_PB_KEY = os.getenv('SUPABASE_ANON_PUBLIC_KEY')
 SUPABASE_URL = os.getenv('SUPABASE_PROJECT_URL')
-SUPABASE_TABLE = "speech-therapy-data" 
+SUPABASE_TABLE = 'speech-therapy-s3-keys'
 
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -69,7 +71,7 @@ def translate_deepl(text):
     result = r.json()
     return result['translations'][0]['text']
 
-def save_to_supabase(imgur_url, word, translation):
+def save_to_supabase(s3_key, word, translation): #imgur_url, word, translation):
     headers = {
         "apikey": SUPABASE_PB_KEY,
         "Authorization": f"Bearer {SUPABASE_PB_KEY}",
@@ -77,7 +79,7 @@ def save_to_supabase(imgur_url, word, translation):
     }
 
     data = {
-        "image_url": imgur_url,
+        's3_key': s3_key, # "image_url": imgur_url,
         "eng_word": word,
         "tr_word": translation  
     }
@@ -87,6 +89,20 @@ def save_to_supabase(imgur_url, word, translation):
         headers=headers,
         json=data
     )
+
+def upload_to_s3(image_url, translation):
+    img_data = requests.get(image_url).content
+    unique_id = uuid.uuid4()
+    
+    ext = 'jpeg' if 'pexels' in image_url or 'unsplash' in image_url else 'jpg'
+    s3_key = f'{translation}-{unique_id}.{ext}'
+
+    s3 = boto3.client('s3',
+                      aws_access_key_id=AWS_ACCESS_KEY,
+                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+
+    s3.put_object(Bucket='therapy-app-s3', Key=s3_key, Body=img_data, ContentType='image/jpeg')
+    return s3_key
 
 @app.route('/')
 def home():
@@ -98,14 +114,10 @@ def home():
         image_url = provider_func(word)
         if image_url: 
             break
-    # image_url = get_pexels_image(word)
-    # try unsplash first
-    # image_url = get_unsplash_image(word)
-    # if not image_url:
-    #     # if unsplash fails, try pixabay    
-    #     image_url = get_pixabay_image(word)
+
     translation = translate_deepl(word).title()
     return render_template('index.html', word=word, image_url=image_url, translation=translation)
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -113,8 +125,11 @@ def upload():
     word = request.form['word']
     translation = request.form['translation']
 
-    save_to_supabase(image_url, word, translation)
+    s3_key = upload_to_s3(image_url, translation)
+    save_to_supabase(s3_key, word, translation)
+
     return redirect(url_for('home'))
+
 
 @app.route('/reject', methods=['POST'])
 def reject():
