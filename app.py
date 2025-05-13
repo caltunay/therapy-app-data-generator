@@ -130,7 +130,6 @@ def upload():
 
     return redirect(url_for('home'))
 
-
 @app.route('/reject', methods=['POST'])
 def reject():
     return redirect(url_for('home'))
