@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import random
 
-# Import functions from new modules
 from image_fetcher import get_pexels_image, get_unsplash_image, get_pixabay_image
 from translation import translate_deepl
 from database import save_to_supabase, update_scoreboard, get_scoreboard, upload_to_s3
