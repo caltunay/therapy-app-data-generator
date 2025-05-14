@@ -35,5 +35,36 @@
             </div>
         </div>
     </div>
+    <div class="scoreboard-container">
+        <div class="user-info">
+            Logged in as: <strong>{{ username }}</strong>
+        </div>
+        <h2>Scoreboard</h2>
+        <table class="scoreboard-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Accepted</th>
+                    <th>Rejected</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in scoreboard %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.accepted or 0 }}</td>
+                    <td>{{ user.rejected or 0 }}</td>
+                    <td>{{ user.total }}</td>
+                </tr>
+                {% endfor %}
+                {% if not scoreboard %}
+                <tr>
+                    <td colspan="4">No scores yet</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
