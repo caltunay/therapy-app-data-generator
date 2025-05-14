@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 import random
 import uuid
+from io import BytesIO
+from PIL import Image
 
 load_dotenv()
 
@@ -175,14 +177,23 @@ def upload_to_s3(image_url, translation):
     img_data = requests.get(image_url).content
     unique_id = uuid.uuid4()
     
-    ext = 'jpeg' if 'pexels' in image_url or 'unsplash' in image_url else 'jpg'
-    s3_key = f'{translation}-{unique_id}.{ext}'
-
+    # Resize image before uploading
+    img = Image.open(BytesIO(img_data))
+    max_size = 800  # Maximum dimension in pixels
+    img.thumbnail((max_size, max_size))
+    
+    # Save optimized image to buffer
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=85, optimize=True)
+    buffer.seek(0)
+    
+    s3_key = f'{translation}-{unique_id}.jpeg'
+    
     s3 = boto3.client('s3',
-                      aws_access_key_id=AWS_ACCESS_KEY,
-                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-
-    s3.put_object(Bucket='therapy-app-s3', Key=s3_key, Body=img_data, ContentType='image/jpeg')
+                     aws_access_key_id=AWS_ACCESS_KEY,
+                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    
+    s3.put_object(Bucket='therapy-app-s3', Key=s3_key, Body=buffer, ContentType='image/jpeg')
     return s3_key
 
 @app.route('/')
