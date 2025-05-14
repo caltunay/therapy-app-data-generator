@@ -1,4 +1,5 @@
 .env
+
 *.log
 dist/
 build/
@@ -9,3 +10,15 @@ coverage/
 *.db
 app-data/
 therapy-data-generator/
+__pycache__/
+
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+venv/
+env/
+*.egg-info/
+dist/
+build/
