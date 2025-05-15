@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image-Word Pair Reviewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns */
+            gap: 20px;
+        }
+        .image-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fff; }
+        .image-container { max-width: 300px; margin: 10px 0; }
+        img { max-width: 100%; height: auto; }
+        .button-container { display: flex; gap: 10px; }
+        .confirm-btn { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .deny-btn { background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .confirmed { background-color: #e6ffe6; border-color: #4CAF50; }
+        .denied { background-color: #fff0e6; border-color: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>Image-Word Pair Reviewer</h1>
+    
+    {% if records %}
+        <p>Found {{ records|length }} records to review.</p>
+        
+        <div class="grid-container">
+        {% for record in records %}
+            <div class="image-card {% if record.get('is_confirmed') == true %}confirmed{% elif record.get('is_confirmed') == false %}denied{% endif %}">
+                <h3>Word: {{ record.get('tr_word', 'N/A') }}</h3>
+                <p>Confirmed: {{ record.get('is_confirmed', 'Not set') }}</p>
+                <p>S3 Key: {{ record.get('s3_key', 'N/A') }}</p>
+                
+                <div class="image-container">
+                    {% if record.get('image_url') %}
+                        <img src="{{ record.get('image_url') }}" alt="{{ record.get('tr_word', 'Image') }}">
+                    {% else %}
+                        <p>No image URL available</p>
+                    {% endif %}
+                </div>
+                
+                <div class="button-container">
+                    {% if record.get('is_confirmed') != true %}
+                    <button class="confirm-btn" onclick="confirmPair('{{ record.get('s3_key', '') }}', this)">Confirm Pair</button>
+                    {% endif %}
+                    
+                    {% if record.get('is_confirmed') != false %}
+                    <button class="deny-btn" onclick="denyPair('{{ record.get('s3_key', '') }}', this)">Deny Pair</button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        
+        <div style="margin-top: 20px;">
+            {% if page > 1 %}
+                <a href="{{ url_for('index', page=page-1) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page }}</span>
+            {% if records|length == 20 %}
+                <a href="{{ url_for('index', page=page+1) }}">Next</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>No records found.</p>
+    {% endif %}
+    
+    <script>
+    function updateCardStatus(button, status) {
+        const card = button.closest('.image-card');
+        card.classList.remove('confirmed', 'denied');
+        if (status === true) {
+            card.classList.add('confirmed');
+            card.querySelector('.confirm-btn').style.display = 'none';
+            if (card.querySelector('.deny-btn')) card.querySelector('.deny-btn').style.display = 'inline-block';
+            card.querySelector('p:nth-child(2)').innerText = 'Confirmed: true';
+        } else if (status === false) {
+            card.classList.add('denied');
+            card.querySelector('.deny-btn').style.display = 'none';
+            if (card.querySelector('.confirm-btn')) card.querySelector('.confirm-btn').style.display = 'inline-block';
+            card.querySelector('p:nth-child(2)').innerText = 'Confirmed: false';
+        }
+    }
+
+    function confirmPair(s3_key, button) {
+        fetch(`/confirm/${s3_key}?ajax=1`, { method: 'POST' })
+            .then(res => res.ok ? updateCardStatus(button, true) : alert('Error confirming'))
+    }
+
+    function denyPair(s3_key, button) {
+        fetch(`/deny/${s3_key}?ajax=1`, { method: 'POST' })
+            .then(res => res.ok ? updateCardStatus(button, false) : alert('Error denying'))
+    }
+    </script>
+</body>
+</html>
+        
