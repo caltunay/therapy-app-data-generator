@@ -35,7 +35,7 @@ def home():
         return "No unused words available.", 404
 
     word = word.title()
-    image_providers = [get_pexels_image, get_unsplash_image, get_pixabay_image]
+    image_providers = [get_pixabay_image, get_unsplash_image, get_pexels_image] # [get_pexels_image, get_unsplash_image, get_pixabay_image]
     
     for provider_func in image_providers:
         image_url = provider_func(word)
