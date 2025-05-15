@@ -5,16 +5,15 @@ import random
 
 from image_fetcher import get_pexels_image, get_unsplash_image, get_pixabay_image
 from translation import translate_deepl
-from database import save_to_supabase, update_scoreboard, get_scoreboard, upload_to_s3
+from database import (
+    save_to_supabase, update_scoreboard, get_scoreboard, upload_to_s3,
+    get_unused_word, mark_word_as_used
+)
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24) 
-
-# Load words once
-with open('word_list.txt', 'r', encoding='utf-8') as f:
-    WORD_LIST = [w.strip() for w in f if w.strip()]
 
 @app.route('/username', methods=['GET', 'POST'])
 def set_username():
@@ -31,8 +30,11 @@ def home():
     if 'username' not in session:
         return redirect(url_for('set_username'))
     
-    word = random.choice(WORD_LIST).title()
-    
+    word = get_unused_word()
+    if not word:
+        return "No unused words available.", 404
+
+    word = word.title()
     image_providers = [get_pexels_image, get_unsplash_image, get_pixabay_image]
     
     for provider_func in image_providers:
@@ -63,6 +65,7 @@ def upload():
 
     s3_key = upload_to_s3(image_url, translation)
     save_to_supabase(s3_key, word, translation)
+    mark_word_as_used(word)
     
     # Update scoreboard - user accepted an image
     update_scoreboard(session['username'], 'accepted')

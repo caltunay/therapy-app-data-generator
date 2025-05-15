@@ -9,6 +9,7 @@ SUPABASE_PB_KEY = os.getenv('SUPABASE_ANON_PUBLIC_KEY')
 SUPABASE_URL = os.getenv('SUPABASE_PROJECT_URL')
 SUPABASE_TABLE = 'speech-therapy-s3-keys'
 SCOREBOARD_TABLE = 'scoreboard'
+WORD_LIST_TABLE = 'word-list'
 
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -124,3 +125,22 @@ def upload_to_s3(image_url, translation):
     
     s3.put_object(Bucket='therapy-app-s3', Key=s3_key, Body=buffer, ContentType='image/jpeg')
     return s3_key
+
+def get_unused_word():
+    """
+    Fetch a random unused word from Supabase.
+    """
+    response = supabase_request('GET', WORD_LIST_TABLE, query_params="is_used=eq.false&select=eng_word")
+    if response.status_code == 200:
+        words = response.json()
+        if words:
+            import random
+            return random.choice(words)['eng_word']
+    return None
+
+def mark_word_as_used(eng_word):
+    """
+    Set is_used=True for the given word in Supabase.
+    """
+    update_data = {"is_used": True}
+    return supabase_request('PATCH', WORD_LIST_TABLE, data=update_data, query_params=f"eng_word=eq.{eng_word.lower()}")
