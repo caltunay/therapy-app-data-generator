@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import random
 
-from image_fetcher import get_pexels_image, get_unsplash_image, get_pixabay_image
+from image_fetcher import get_brave_image, get_pexels_image, get_unsplash_image, get_pixabay_image
 from translation import translate_deepl
 from database import (
     save_to_supabase, update_scoreboard, get_scoreboard, upload_to_s3,
@@ -33,9 +33,10 @@ def home():
     word = get_unused_word()
     if not word:
         return "No unused words available.", 404
+    print(word)
 
     word = word.title()
-    image_providers = [get_unsplash_image, get_pexels_image, get_pixabay_image]
+    image_providers = [get_brave_image, get_unsplash_image, get_pexels_image, get_pixabay_image] #[get_unsplash_image, get_pexels_image, get_pixabay_image]
     
     for provider_func in image_providers:
         image_url = provider_func(word)

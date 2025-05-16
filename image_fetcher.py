@@ -1,9 +1,39 @@
 import requests
 import os
 
+BRAVE_API_KEY = os.getenv('BRAVE_API_KEY')
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_API_KEY')
 PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')
 PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')
+
+def get_brave_image(word):
+    """
+    Fetch the most relevant image from Brave Search.
+    
+    Args:
+        word (str): Search term
+        
+    Returns:
+        str: URL of the most relevant image
+    """
+    url = 'https://api.search.brave.com/res/v1/images/search'
+
+    headers = {
+        'Accept': 'application/json',
+        'X-Subscription-Token': BRAVE_API_KEY,
+    }
+
+    params = {
+        'q': f"{word} photograph",
+        'count': 1,  # number of images
+    }
+    
+    response = requests.get(url, headers=headers, params=params)
+    # print(response.status_code)
+    if response.status_code == 200:# and len(data['results']) > 0:
+        data = response.json()
+        return data['results'][0]['properties']['url']
+    return None
 
 def get_pexels_image(word, orientation=None, color=None, max_results=10):
     """
@@ -220,3 +250,5 @@ def get_pixabay_image(word, orientation=None, color=None, max_results=30):
     
     # Return the URL of the highest-scoring image
     return scored_hits[0][1]['largeImageURL'] if scored_hits else None
+
+
