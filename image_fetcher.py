@@ -24,7 +24,7 @@ def get_brave_image(word):
     }
 
     params = {
-        'q': f"{word} photograph",
+        'q': word,
         'count': 1,  # number of images
     }
     
