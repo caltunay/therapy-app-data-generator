@@ -30,6 +30,7 @@
                     <button type="submit">Kabul Et</button>
                 </form>
                 <form action="{{ url_for('reject') }}" method="post">
+                    <input type="hidden" name="word" value="{{ word }}" > 
                     <button type="submit" class="reject-button">Reddet</button>
                 </form>
             </div>

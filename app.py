@@ -80,7 +80,10 @@ def reject():
     
     # Update scoreboard - user rejected an image
     update_scoreboard(session['username'], 'rejected')
-    
+    # update by cenan
+    word = request.form['word']
+    mark_word_as_used(word)
+    # end of update 
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
