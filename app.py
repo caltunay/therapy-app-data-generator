@@ -73,6 +73,34 @@ def upload():
 
     return redirect(url_for('home'))
 
+@app.route('/upload_custom', methods=['POST'])
+def upload_custom():
+    if 'username' not in session:
+        return redirect(url_for('set_username'))
+    
+    # Only allow cenan to use custom word feature
+    if session['username'].lower() != 'cenan':
+        return redirect(url_for('home'))
+    
+    image_url = request.form['image_url']
+    original_word = request.form['word']
+    custom_translation = request.form['custom_translation'].strip()
+    
+    # Use custom translation if provided, otherwise use original translation
+    if custom_translation:
+        translation = custom_translation.title()
+    else:
+        translation = request.form['translation']
+
+    s3_key = upload_to_s3(image_url, translation)
+    save_to_supabase(s3_key, original_word, translation)
+    mark_word_as_used(original_word)
+    
+    # Update scoreboard - user accepted an image
+    update_scoreboard(session['username'], 'accepted')
+
+    return redirect(url_for('home'))
+
 @app.route('/reject', methods=['POST'])
 def reject():
     if 'username' not in session:

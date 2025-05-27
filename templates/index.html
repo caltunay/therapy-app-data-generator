@@ -34,6 +34,22 @@
                     <button type="submit" class="reject-button">Reddet</button>
                 </form>
             </div>
+            
+            {% if username.lower() == 'cenan' %}
+            <div class="custom-word-section">
+                <hr style="width: 60%; margin: 24px auto;">
+                <h4>Özel Kelime Girişi (Sadece Cenan)</h4>
+                <form action="{{ url_for('upload_custom') }}" method="post" class="custom-word-form">
+                    <input type="hidden" name="image_url" value="{{ image_url }}">
+                    <input type="hidden" name="translation" value="{{ translation }}">
+                    <input type="hidden" name="word" value="{{ word }}">
+                    <div class="custom-input-group">
+                        <input type="text" name="custom_translation" placeholder="Doğru kelimeyi buraya yazın..." required>
+                        <button type="submit" class="custom-submit-button">Özel Kelime ile Kabul Et</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
     <div class="scoreboard-container">
