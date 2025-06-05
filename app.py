@@ -83,7 +83,7 @@ def upload_custom():
         return redirect(url_for('home'))
     
     image_url = request.form['image_url']
-    original_word = request.form['word'].title()  # Titleize the English word
+    original_word = request.form['word'].strip().title()  # Trim whitespace and titleize the English word
     custom_translation = request.form['custom_translation'].strip()
     
     # Use custom translation if provided, otherwise use original translation
