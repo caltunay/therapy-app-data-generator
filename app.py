@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import random
 
 from image_fetcher import get_brave_image, get_pexels_image, get_unsplash_image, get_pixabay_image
-from translation import translate_deepl
+from translation import translate
 from database import (
     save_to_supabase, update_scoreboard, get_scoreboard, upload_to_s3,
     get_unused_word, mark_word_as_used
@@ -43,7 +43,7 @@ def home():
         if image_url: 
             break
 
-    translation = translate_deepl(word).title()
+    translation = translate(word).title()
     
     # Get scoreboard data
     scoreboard = get_scoreboard()
