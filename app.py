@@ -38,6 +38,7 @@ def home():
     word = word.title()
     image_providers = [get_unsplash_image, get_pexels_image, get_pixabay_image, get_brave_image] 
     
+    image_url = None
     for provider_func in image_providers:
         image_url = provider_func(word)
         if image_url: 
@@ -50,7 +51,7 @@ def home():
     
     return render_template('index.html', 
                           word=word, 
-                          image_url=image_url, 
+                          image_url=image_url,
                           translation=translation, 
                           username=session['username'],
                           scoreboard=scoreboard)
